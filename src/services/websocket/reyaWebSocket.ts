@@ -2,16 +2,9 @@
  * WebSocket service for real-time updates from Reya DEX.
  * Handles connection management, heartbeat, and channel subscriptions.
  */
-import {
-  WebSocketMessage,
-  SubscribeMessage,
-  PongMessage,
-  ChannelDataMessage,
-} from './types';
-import { Price, Position } from '../api/types';
-import { SOCKET_URL, MAX_RECONNECT_ATTEMPTS, RECONNECT_DELAY } from '../api/constants';
-
-type MessageHandler<T = unknown> = (data: T) => void;
+import {ChannelDataMessage, MessageHandler, PongMessage, SubscribeMessage, WebSocketMessage,} from './types';
+import {Position, Price} from '../api/types';
+import {CONNECTION_TIMEOUT, MAX_RECONNECT_ATTEMPTS, RECONNECT_DELAY, SOCKET_URL} from '../api/constants';
 
 let ws: WebSocket | null = null;
 
@@ -19,12 +12,13 @@ let ws: WebSocket | null = null;
 const subscriptions = new Set<string>();
 
 /** Map of channel names to their respective data handlers */
-const messageHandlers = new Map<string, MessageHandler>();
+const messageHandlers = new Map<string, MessageHandler<string>>();
 
 let reconnectAttempts = 0;
 let isConnecting = false;
 let heartbeatInterval: number | null = null;
 let connectionPromise: Promise<void> | null = null;
+let lastMessageTime = Date.now();
 
 /**
  * Connects to the WebSocket server.
@@ -53,6 +47,7 @@ const connect = (): Promise<void> => {
         isConnecting = false;
         connectionPromise = null;
         reconnectAttempts = 0;
+        lastMessageTime = Date.now();
         startHeartbeat();
 
         // Resubscribe to channels after reconnection
@@ -118,13 +113,16 @@ const subscribe = (channel: string): void => {
   }
 
   const message: SubscribeMessage = {
-    type: 'subscribe',
-    channel,
+    type: 'subscribe', channel,
   };
 
-  ws.send(JSON.stringify(message));
-  subscriptions.add(channel);
-  console.log('Subscribed to channel:', channel);
+  try {
+    ws.send(JSON.stringify(message));
+    subscriptions.add(channel);
+    console.log('Subscribed to channel:', channel);
+  } catch (error) {
+    console.error(`Failed to subscribe to channel ${channel}:`, error);
+  }
 };
 
 /**
@@ -132,17 +130,24 @@ const subscribe = (channel: string): void => {
  * @param channel The channel name to unsubscribe from.
  */
 const unsubscribe = (channel: string): void => {
-  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    subscriptions.delete(channel);
+    messageHandlers.delete(channel);
+    return;
+  }
 
   const message = {
-    type: 'unsubscribe',
-    channel,
+    type: 'unsubscribe', channel,
   };
 
-  ws.send(JSON.stringify(message));
-  subscriptions.delete(channel);
-  messageHandlers.delete(channel);
-  console.log('Unsubscribed from channel:', channel);
+  try {
+    ws.send(JSON.stringify(message));
+    subscriptions.delete(channel);
+    messageHandlers.delete(channel);
+    console.log('Unsubscribed from channel:', channel);
+  } catch (error) {
+    console.error(`Failed to unsubscribe from channel ${channel}:`, error);
+  }
 };
 
 /**
@@ -150,9 +155,9 @@ const unsubscribe = (channel: string): void => {
  * @param handler Callback function to process price updates.
  * @returns A cleanup function to unsubscribe from the channel.
  */
-const subscribeToPrices = (handler: (prices: Price[]) => void): () => void => {
+const subscribeToPrices = (handler: (prices: Price | Price[]) => void): () => void => {
   const channel = '/v2/prices';
-  messageHandlers.set(channel, handler as MessageHandler<unknown>);
+  messageHandlers.set(channel, handler as MessageHandler<string>);
   subscribe(channel);
   return () => {
     unsubscribe(channel);
@@ -167,7 +172,7 @@ const subscribeToPrices = (handler: (prices: Price[]) => void): () => void => {
  */
 const subscribeToWalletPositions = (address: string, handler: (positions: Position[]) => void): () => void => {
   const channel = `/v2/wallet/${address}/positions`;
-  messageHandlers.set(channel, handler as MessageHandler<unknown>);
+  messageHandlers.set(channel, handler as MessageHandler<string>);
   subscribe(channel);
   return () => {
     unsubscribe(channel);
@@ -179,6 +184,7 @@ const subscribeToWalletPositions = (address: string, handler: (positions: Positi
  * @param data Raw message data string.
  */
 const handleMessage = (data: string): void => {
+  lastMessageTime = Date.now();
   try {
     const message: WebSocketMessage = JSON.parse(data);
 
@@ -200,7 +206,7 @@ const handleMessage = (data: string): void => {
         break;
 
       default:
-        // Ignore other message types
+        console.debug('Received unhandled WebSocket message type:', message.type);
         break;
     }
   } catch (error) {
@@ -213,7 +219,7 @@ const handleMessage = (data: string): void => {
  * @param message The parsed channel data message.
  */
 const handleChannelData = (message: ChannelDataMessage): void => {
-  const { channel, data } = message;
+  const {channel, data} = message;
   const handler = messageHandlers.get(channel);
 
   if (handler && data) {
@@ -229,11 +235,14 @@ const sendPong = (timestamp: number): void => {
   if (!ws || ws.readyState !== WebSocket.OPEN) return;
 
   const pong: PongMessage = {
-    type: 'pong',
-    timestamp,
+    type: 'pong', timestamp,
   };
 
-  ws.send(JSON.stringify(pong));
+  try {
+    ws.send(JSON.stringify(pong));
+  } catch (error) {
+    console.error('Failed to send pong:', error);
+  }
 };
 
 /**
@@ -242,13 +251,21 @@ const sendPong = (timestamp: number): void => {
 const startHeartbeat = (): void => {
   stopHeartbeat();
 
-  // Send periodic pings to keep connection alive
+  // Periodic check for connection health and "zombie" states
   heartbeatInterval = window.setInterval(() => {
-    if (ws?.readyState === WebSocket.OPEN) {
-      // Server sends pings, we just need to respond with pongs
-      // This interval is just to check connection health
+    const now = Date.now();
+
+    // If no messages received for a long time, consider connection dead
+    if (now - lastMessageTime > CONNECTION_TIMEOUT) {
+      console.warn('WebSocket heartbeat timeout, forcing reconnect...');
+      if (ws) {
+        ws.close(); // This will trigger onclose and attemptReconnect
+      } else {
+        attemptReconnect();
+      }
+      return;
     }
-  }, 30000); // 30 seconds
+  }, 30000); // Check every 30 seconds
 };
 
 /**
@@ -289,11 +306,5 @@ const isConnected = (): boolean => {
 
 // Export functional API
 export const reyaWebSocket = {
-  connect,
-  disconnect,
-  subscribe,
-  unsubscribe,
-  subscribeToPrices,
-  subscribeToWalletPositions,
-  isConnected,
+  connect, disconnect, subscribe, unsubscribe, subscribeToPrices, subscribeToWalletPositions, isConnected,
 };

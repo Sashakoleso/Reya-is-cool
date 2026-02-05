@@ -1,3 +1,5 @@
+import { Price, Position } from '../api/types';
+
 export type WebSocketMessageType =
   | 'subscribe'
   | 'subscribed'
@@ -28,3 +30,14 @@ export type PongMessage = {
 export type ChannelDataMessage<T = unknown> = {
   type: 'channel_data'; timestamp: number; channel: string; data: T;
 };
+
+/** Specific data types for known channels */
+export type ChannelDataMap = {
+  '/v2/prices': Price | Price[];
+  [key: `/v2/wallet/${string}/positions`]: Position[];
+};
+
+export type MessageHandler<K extends keyof ChannelDataMap | string> = 
+  K extends keyof ChannelDataMap 
+    ? (data: ChannelDataMap[K]) => void 
+    : (data: unknown) => void;
