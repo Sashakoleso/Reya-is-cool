@@ -30,6 +30,21 @@ The project will be available at `http://localhost:3000` (or another port specif
 npm run build
 ```
 
+### Type Check and Build
+```bash
+npm run build:check
+```
+
+### Type Check and Lint
+```bash
+npm run check
+```
+
+### Linting
+```bash
+npm run lint
+```
+
 ### Preview Production Build
 ```bash
 npm run preview

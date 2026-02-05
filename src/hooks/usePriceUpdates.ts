@@ -8,7 +8,7 @@ import {Price} from '../services/api/types';
  * It automatically subscribes to price changes on mount and unsubscribes on unmount.
  */
 export const usePriceUpdates = () => {
-  const updatePrices = usePricesStore.updatePrices();
+  const updatePrices = usePricesStore.useUpdatePrices();
 
   useEffect(() => {
     let isMounted = true;

@@ -7,17 +7,16 @@ import {PositionsTable} from '../PositionsTable/PositionsTable';
 import * as styles from './PortfolioPage.css';
 
 export const PortfolioPage: FC = () => {
-  const isWalletAddressValid = useWalletStore.isWalletAddressValid();
+  const isWalletAddressValid = useWalletStore.useIsWalletAddressValid();
   useWalletPositions();
   usePriceUpdates();
 
   return (
-
     <div className={styles.page}>
-    <div className={styles.content}>
-      <WalletInput/>
-      {isWalletAddressValid && <PositionsTable/>}
+      <div className={styles.content}>
+        <WalletInput/>
+        {isWalletAddressValid && <PositionsTable/>}
+      </div>
     </div>
-  </div>
   );
-}
+};

@@ -37,7 +37,7 @@ export const button = style({
   color: vars.colors.background,
   borderRadius: vars.borderRadius.md,
   fontSize: vars.fontSize.md,
-  fontWeight: '400',
+  fontWeight: vars.fontWeight.regular,
   transition: 'all 0.15s ease',
   whiteSpace: 'nowrap',
 

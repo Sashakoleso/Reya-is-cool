@@ -1,6 +1,7 @@
 import {FC} from "react";
 import {SortIcon} from '../../../icons/SortIcon';
-import {SortField, TableHeaderProps} from './types';
+import {SortField} from '../../../hooks/types';
+import {TableHeaderProps} from './types';
 import * as styles from './PositionsTable.css';
 
 export const TableHeader: FC<TableHeaderProps> = ({

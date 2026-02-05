@@ -5,3 +5,6 @@ export type AggregatedPosition = {
   positionValue: string;
   markPrice: string;
 };
+
+export type SortField = 'symbol' | 'size' | 'value' | 'price';
+export type SortDirection = 'asc' | 'desc';

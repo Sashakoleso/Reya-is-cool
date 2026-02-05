@@ -13,7 +13,7 @@ export const header = style({
 
 export const title = style({
   fontSize: vars.fontSize.lg,
-  fontWeight: '400',
+  fontWeight: vars.fontWeight.regular,
   color: vars.colors.text,
   letterSpacing: '-0.01em',
 });
@@ -36,7 +36,7 @@ export const th = style({
   padding: `${vars.spacing.md} ${vars.spacing.lg}`,
   textAlign: 'left',
   fontSize: vars.fontSize.sm,
-  fontWeight: '400',
+  fontWeight: vars.fontWeight.regular,
   color: vars.colors.textSecondary,
   textTransform: 'none',
   letterSpacing: '0',

@@ -11,8 +11,8 @@ import {AggregatedPosition} from "./types.ts";
  * @returns Array of aggregated positions ready for rendering in a table.
  */
 export const usePositionCalculations = (): AggregatedPosition[] => {
-  const positions = usePositionsStore.positions();
-  const prices = usePricesStore.prices();
+  const positions = usePositionsStore.usePositions();
+  const prices = usePricesStore.usePrices();
 
   return useMemo(() => {
     // 1. Group positions by symbol and calculate net exposure

@@ -9,11 +9,11 @@ import {
   ChannelDataMessage,
 } from './types';
 import { Price, Position } from '../api/types';
+import { SOCKET_URL, MAX_RECONNECT_ATTEMPTS, RECONNECT_DELAY } from '../api/constants';
 
 type MessageHandler<T = unknown> = (data: T) => void;
 
 let ws: WebSocket | null = null;
-const SOCKET_URL = 'wss://websocket-testnet.reya.xyz';
 
 /** Active subscriptions set to allow resubscription on reconnect */
 const subscriptions = new Set<string>();
@@ -22,8 +22,6 @@ const subscriptions = new Set<string>();
 const messageHandlers = new Map<string, MessageHandler>();
 
 let reconnectAttempts = 0;
-const maxReconnectAttempts = 5;
-const reconnectDelay = 3000;
 let isConnecting = false;
 let heartbeatInterval: number | null = null;
 let connectionPromise: Promise<void> | null = null;
@@ -267,19 +265,19 @@ const stopHeartbeat = (): void => {
  * Attempt to reconnect after disconnection
  */
 const attemptReconnect = (): void => {
-  if (reconnectAttempts >= maxReconnectAttempts) {
+  if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
     console.error('Max reconnection attempts reached');
     return;
   }
 
   reconnectAttempts++;
-  console.log(`Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts})...`);
+  console.log(`Attempting to reconnect (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
 
   setTimeout(() => {
     connect().catch((error) => {
       console.error('Reconnection failed:', error);
     });
-  }, reconnectDelay);
+  }, RECONNECT_DELAY);
 };
 
 /**

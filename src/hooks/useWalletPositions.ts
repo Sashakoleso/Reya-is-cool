@@ -11,13 +11,13 @@ import {Position} from '../services/api/types';
  * Implements protection against race conditions using isMounted flag.
  */
 export const useWalletPositions = () => {
-  const walletAddress = useWalletStore.walletAddress();
-  const setPositions = usePositionsStore.setPositions();
-  const setLoadingPositions = usePositionsStore.setLoadingPositions();
-  const setPositionsError = usePositionsStore.setPositionsError();
+  const walletAddress = useWalletStore.useWalletAddress();
+  const setPositions = usePositionsStore.useSetPositions();
+  const setLoadingPositions = usePositionsStore.useSetLoadingPositions();
+  const setPositionsError = usePositionsStore.useSetPositionsError();
 
   useEffect(() => {
-    // 1. Clear positions if no address is provided
+    // Clear positions if no address is provided
     if (!walletAddress) {
       setPositions([]);
       return;

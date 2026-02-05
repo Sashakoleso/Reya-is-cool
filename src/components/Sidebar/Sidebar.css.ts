@@ -21,7 +21,7 @@ export const navItem = style({
   textDecoration: 'none',
   transition: 'all 0.15s ease',
   fontSize: vars.fontSize.md,
-  fontWeight: '400',
+  fontWeight: vars.fontWeight.regular,
   cursor: 'pointer',
   border: `1px solid ${vars.colors.border}`,
 });
@@ -30,21 +30,13 @@ export const navSubItem = style({
   display: 'flex',
   alignItems: 'center',
   marginLeft: vars.spacing.md,
-  // gap: vars.spacing.md,
   padding: `${vars.spacing.md} ${vars.spacing.lg}`,
-  // borderRadius: vars.borderRadius.md,
   color: vars.colors.text,
   fontSize: vars.fontSize.md,
-  fontWeight: '400',
+  fontWeight: vars.fontWeight.regular,
   cursor: 'pointer',
 });
 export const navItemActive = style({
   backgroundColor: vars.colors.backgroundSecondary,
   color: vars.colors.text,
-});
-
-export const navSubIcon = style({
-  // width: '18px',
-  height: '48px',
-  flexShrink: 0,
 });

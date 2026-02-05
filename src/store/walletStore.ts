@@ -20,8 +20,8 @@ const useWalletStoreBase = create<WalletState>((set) => ({
  * Exported hooks for accessing walletStore state and actions.
  */
 export const useWalletStore = Object.assign(useWalletStoreBase, {
-  walletAddress: () => useWalletStoreBase((state) => state.walletAddress),
-  isWalletAddressValid: () => useWalletStoreBase((state) => state.isWalletAddressValid),
-  setWalletAddress: () => useWalletStoreBase((state) => state.setWalletAddress),
-  setIsWalletAddressValid: () => useWalletStoreBase((state) => state.setIsWalletAddressValid),
+  useWalletAddress: () => useWalletStoreBase((state) => state.walletAddress),
+  useIsWalletAddressValid: () => useWalletStoreBase((state) => state.isWalletAddressValid),
+  useSetWalletAddress: () => useWalletStoreBase((state) => state.setWalletAddress),
+  useSetIsWalletAddressValid: () => useWalletStoreBase((state) => state.setIsWalletAddressValid),
 });

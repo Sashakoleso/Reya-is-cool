@@ -7,7 +7,7 @@ import {reyaApi} from '../services/api/reyaApi';
  * Market definitions are used to get metadata like max leverage for each trading pair.
  */
 export const useMarkets = () => {
-  const setMarkets = useMarketsStore.setMarkets();
+  const setMarkets = useMarketsStore.useSetMarkets();
 
   useEffect(() => {
     let isMounted = true;

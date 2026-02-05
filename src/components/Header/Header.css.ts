@@ -29,7 +29,7 @@ export const logoIconWrap = style({
 
 export const logoText = style({
   fontSize: vars.fontSize.lg,
-  fontWeight: '400',
+  fontWeight: vars.fontWeight.regular,
   color: vars.colors.textSecondary,
   letterSpacing: '-0.01em',
 });

@@ -1,7 +1,4 @@
-import { AggregatedPosition } from '../../../hooks/types';
-
-export type SortField = 'symbol' | 'size' | 'value' | 'price';
-export type SortDirection = 'asc' | 'desc';
+import { AggregatedPosition, SortField, SortDirection } from '../../../hooks/types';
 
 export type TableHeaderProps = {
   sortField: SortField;

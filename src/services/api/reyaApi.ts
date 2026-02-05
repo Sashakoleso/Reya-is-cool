@@ -1,11 +1,11 @@
 import axios, {AxiosInstance} from 'axios';
 import {MarketDefinition, Position} from './types';
+import { BASE_URL } from './constants';
 
 /**
  * REST API client for Reya DEX.
  * Provides methods for fetching markets and user positions.
  */
-const BASE_URL = 'https://api.reya.xyz/v2';
 const client: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 10000, 

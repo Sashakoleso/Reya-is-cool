@@ -17,6 +17,6 @@ const useMarketsStoreBase = create<MarketsState>((set) => ({
  * Using a selector-based pattern for better performance and easier access.
  */
 export const useMarketsStore = Object.assign(useMarketsStoreBase, {
-  markets: () => useMarketsStoreBase((state) => state.markets),
-  setMarkets: () => useMarketsStoreBase((state) => state.setMarkets),
+  useMarkets: () => useMarketsStoreBase((state) => state.markets),
+  useSetMarkets: () => useMarketsStoreBase((state) => state.setMarkets),
 });

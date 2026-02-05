@@ -33,7 +33,6 @@ export const Footer: FC = () => {
         <a
           className={styles.linkItem}
           href="https://docs.reya.xyz/native-stablecoin/faqs"
-          target="_blank"
           rel="noopener noreferrer"
         >
           Support

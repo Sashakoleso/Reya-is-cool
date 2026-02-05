@@ -9,8 +9,8 @@ const DEFAULT_WALLET = '0xB4B77d6180cc14472A9a7BDFF01cc2459368D413';
 export const WalletInput: FC<WalletInputProps> = ({onSubmit}) => {
   const [inputValue, setInputValue] = useState(DEFAULT_WALLET);
   const [error, setError] = useState<string | null>(null);
-  const setWalletAddress = useWalletStore.setWalletAddress();
-  const setIsWalletAddressValid = useWalletStore.setIsWalletAddressValid();
+  const setWalletAddress = useWalletStore.useSetWalletAddress();
+  const setIsWalletAddressValid = useWalletStore.useSetIsWalletAddressValid();
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();

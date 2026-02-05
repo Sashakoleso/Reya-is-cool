@@ -1,5 +1,4 @@
-import { AggregatedPosition } from '../../../hooks/types';
-import { SortField, SortDirection } from './types';
+import { AggregatedPosition, SortField, SortDirection } from '../../../hooks/types';
 
 /**
  * Sort positions by the specified field and direction
@@ -67,4 +66,16 @@ export const getNextSortState = (
       direction: 'asc',
     };
   }
+};
+
+/**
+ * Determine if the table should show actual content or a status message
+ */
+export const shouldShowTableContent = (
+  isLoading: boolean,
+  error: string | null,
+  walletAddress: string | null,
+  hasPositions: boolean
+): boolean => {
+  return !isLoading && !error && !!walletAddress && hasPositions;
 };

@@ -44,6 +44,6 @@ const usePricesStoreBase = create<PricesState>((set, get) => ({
  * Exported hooks for accessing pricesStore state and actions.
  */
 export const usePricesStore = Object.assign(usePricesStoreBase, {
-  prices: () => usePricesStoreBase((state) => state.prices),
-  updatePrices: () => usePricesStoreBase((state) => state.updatePrices),
+  usePrices: () => usePricesStoreBase((state) => state.prices),
+  useUpdatePrices: () => usePricesStoreBase((state) => state.updatePrices),
 });

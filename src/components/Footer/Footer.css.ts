@@ -41,10 +41,3 @@ export const linkItem = style({
     },
   },
 });
-
-export const linkItemWithBorders = style([
-  linkItem,
-  {
-    borderInline: `1px solid ${vars.colors.border}`,
-  }
-]);

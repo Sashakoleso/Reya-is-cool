@@ -7,30 +7,30 @@ import {useMarketsStore} from '../../../store/marketsStore';
 export const PositionRow: FC<PositionRowProps> = memo(({position}) => {
   const displayName = getSymbolDisplayName(position.symbol);
   const isLong = position.side === 'B';
-  const markets = useMarketsStore.markets();
+  const markets = useMarketsStore.useMarkets();
   const market = markets.find((mkt) => mkt.symbol === position.symbol);
 
   const maxLeverage = market ? `${market.maxLeverage}x` : '';
 
   return (
     <tr className={styles.row}>
-    <td className={styles.marketCell}>
+      <td className={styles.marketCell}>
         <span className={isLong ? styles.symbolLong : styles.symbolShort}>
           {displayName}
         </span>
-      <span className={`${styles.symbolSuffix} ${isLong ? styles.symbolLong : styles.symbolShort}`}>
+        <span className={`${styles.symbolSuffix} ${isLong ? styles.symbolLong : styles.symbolShort}`}>
           {maxLeverage}
         </span>
-    </td>
-    <td className={styles.sizeCell}>
-      {formatNumber(position.totalQty, 2)}
-    </td>
-    <td className={styles.valueCell}>
-      {formatUSD(position.positionValue)}
-    </td>
-    <td className={styles.priceCell}>
-      {formatNumber(position.markPrice, 2)}
-    </td>
-  </tr>
+      </td>
+      <td className={styles.sizeCell}>
+        {formatNumber(position.totalQty, 2)}
+      </td>
+      <td className={styles.valueCell}>
+        {formatUSD(position.positionValue)}
+      </td>
+      <td className={styles.priceCell}>
+        {formatNumber(position.markPrice, 2)}
+      </td>
+    </tr>
   );
 });

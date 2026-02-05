@@ -25,10 +25,10 @@ const usePositionsStoreBase = create<PositionsState>((set) => ({
  * Exported hooks for accessing positionsStore state and actions.
  */
 export const usePositionsStore = Object.assign(usePositionsStoreBase, {
-  positions: () => usePositionsStoreBase((state) => state.positions),
-  isLoadingPositions: () => usePositionsStoreBase((state) => state.isLoadingPositions),
-  positionsError: () => usePositionsStoreBase((state) => state.positionsError),
-  setPositions: () => usePositionsStoreBase((state) => state.setPositions),
-  setLoadingPositions: () => usePositionsStoreBase((state) => state.setLoadingPositions),
-  setPositionsError: () => usePositionsStoreBase((state) => state.setPositionsError),
+  usePositions: () => usePositionsStoreBase((state) => state.positions),
+  useIsLoadingPositions: () => usePositionsStoreBase((state) => state.isLoadingPositions),
+  usePositionsError: () => usePositionsStoreBase((state) => state.positionsError),
+  useSetPositions: () => usePositionsStoreBase((state) => state.setPositions),
+  useSetLoadingPositions: () => usePositionsStoreBase((state) => state.setLoadingPositions),
+  useSetPositionsError: () => usePositionsStoreBase((state) => state.setPositionsError),
 });
