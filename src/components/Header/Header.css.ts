@@ -42,7 +42,6 @@ export const walletInfo = style({
   backgroundColor: vars.colors.backgroundSecondary,
   borderRadius: vars.borderRadius.md,
   fontSize: vars.fontSize.sm,
-  fontFamily: vars.fontFamily.mono,
   color: vars.colors.textSecondary,
   border: `1px solid ${vars.colors.border}`,
 });

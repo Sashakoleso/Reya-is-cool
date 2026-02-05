@@ -19,7 +19,6 @@ export const input = style({
   borderRadius: vars.borderRadius.md,
   color: vars.colors.text,
   fontSize: vars.fontSize.md,
-  fontFamily: vars.fontFamily.mono,
   transition: 'border-color 0.15s ease',
 
   '::placeholder': {

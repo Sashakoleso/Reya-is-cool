@@ -16,7 +16,6 @@ globalStyle('*, *::before, *::after', {
 
 globalStyle('html, body', {
   height: '100%',
-  fontFamily: vars.fontFamily.sans,
   backgroundColor: vars.colors.background,
   color: vars.colors.text,
   fontSize: vars.fontSize.md,

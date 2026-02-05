@@ -34,18 +34,15 @@ export const symbolSuffix = style({
 });
 
 export const sizeCell = style([cell, {
-  fontFamily: vars.fontFamily.mono,
   color: vars.colors.text,
 }]);
 
 export const valueCell = style([cell, {
-  fontFamily: vars.fontFamily.mono,
   fontWeight: vars.fontWeight.medium,
   color: vars.colors.text,
 }]);
 
 export const priceCell = style([cell, {
-  fontFamily: vars.fontFamily.mono,
   color: vars.colors.text,
   fontWeight: vars.fontWeight.medium,
 }]);
