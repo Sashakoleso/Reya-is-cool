@@ -2,7 +2,7 @@
  * WebSocket service for real-time updates from Reya DEX.
  * Handles connection management, heartbeat, and channel subscriptions.
  */
-import {ChannelDataMessage, MessageHandler, PongMessage, SubscribeMessage, WebSocketMessage,} from './types';
+import {ChannelDataMessage, MessageHandler, PongMessage, SubscribeMessage, SubscribedMessage, WebSocketMessage,} from './types';
 import {Position, Price} from '../api/types';
 import {CONNECTION_TIMEOUT, MAX_RECONNECT_ATTEMPTS, RECONNECT_DELAY, SOCKET_URL} from '../api/constants';
 
@@ -106,8 +106,10 @@ const disconnect = (): void => {
  * @param channel The channel name to subscribe to.
  */
 const subscribe = (channel: string): void => {
+  console.log('[WebSocket] subscribe() called for channel:', channel, 'WebSocket state:', ws?.readyState);
+
   if (!ws || ws.readyState !== WebSocket.OPEN) {
-    console.warn('WebSocket not connected, queuing subscription:', channel);
+    console.warn('[WebSocket] WebSocket not connected, queuing subscription:', channel);
     subscriptions.add(channel);
     return;
   }
@@ -120,10 +122,9 @@ const subscribe = (channel: string): void => {
     ws.send(JSON.stringify(message));
     if (!subscriptions.has(channel)) {
       subscriptions.add(channel);
-      console.log('Subscribed to channel:', channel);
     }
   } catch (error) {
-    console.error(`Failed to subscribe to channel ${channel}:`, error);
+    console.error(`[WebSocket] Failed to subscribe to channel ${channel}:`, error);
   }
 };
 
@@ -168,18 +169,21 @@ const subscribeToPrices = (handler: (prices: Price | Price[]) => void): () => vo
 
 /**
  * Subscribes to position updates for a specific wallet address.
+ * Note: This channel only sends data on subscription and trade events, not continuous updates.
  * @param address The wallet address.
  * @param handler Callback function to process position updates.
  * @returns A cleanup function to unsubscribe from the channel.
  */
 const subscribeToWalletPositions = (address: string, handler: (positions: Position[]) => void): () => void => {
   const channel = `/v2/wallet/${address}/positions`;
+  console.log('[WebSocket] subscribeToWalletPositions() called for correct wallet address');
   messageHandlers.set(channel, handler as MessageHandler<string>);
   subscribe(channel);
   return () => {
     unsubscribe(channel);
   };
 };
+
 
 /**
  * Parses and routes incoming WebSocket messages.
@@ -200,7 +204,21 @@ const handleMessage = (data: string): void => {
         break;
 
       case 'subscribed':
-        console.log('Subscription confirmed:', message.channel);
+        // Position channel sends initial data in the subscribed message
+        const subscribedMsg = message as SubscribedMessage;
+
+        // Check for 'contents' field (used by position channel)
+        if (subscribedMsg.contents) {
+          const handler = messageHandlers.get(subscribedMsg.channel);
+          if (handler) {
+            handler(subscribedMsg.contents);
+          }
+        } else if (subscribedMsg.data) {
+          const handler = messageHandlers.get(subscribedMsg.channel);
+          if (handler) {
+            handler(subscribedMsg.data);
+          }
+        }
         break;
 
       case 'error':

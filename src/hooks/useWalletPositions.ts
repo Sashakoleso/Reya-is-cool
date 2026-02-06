@@ -6,14 +6,21 @@ import {reyaWebSocket} from '../services/websocket/reyaWebSocket';
 import {Position} from '../services/api/types';
 
 /**
- * Custom hook that fetches and manages wallet positions from the REST API and WebSocket.
- * It reacts to changes in the wallet address and updates the positionsStore.
+ * Custom hook that manages wallet positions using hybrid WebSocket + polling approach.
+ *
+ * Data Sources:
+ * - WebSocket channel: /v2/wallet/{address}/positions
+ *   - Provides initial snapshot on subscription
+ *   - Sends updates only on trade executions (NOT on funding payments)
+ * - REST API polling (every 30 seconds when positions exist):
+ *   - Updates position sizes affected by funding payments
+ *   - Ensures data stays fresh even without trades
+ *
  * Implements protection against race conditions using isMounted flag.
  */
 export const useWalletPositions = () => {
   const walletAddress = useWalletStore.useWalletAddress();
   const setPositions = usePositionsStore.useSetPositions();
-  const updatePositions = usePositionsStore.useUpdatePositions();
   const setLoadingPositions = usePositionsStore.useSetLoadingPositions();
   const setPositionsError = usePositionsStore.useSetPositionsError();
 
@@ -24,41 +31,61 @@ export const useWalletPositions = () => {
       return;
     }
 
+    // Normalize address to lowercase for WebSocket channel consistency
+    const normalizedAddress = walletAddress.toLowerCase();
+
     let isMounted = true;
     let unsubscribe: (() => void) | null = null;
+    let pollInterval: NodeJS.Timeout | null = null;
 
     /**
-     * Fetches positions for the current wallet address and sets up WebSocket subscription.
+     * Initializes WebSocket connection and subscribes to position updates.
+     * Also sets up polling for funding payment updates.
      */
     const initializePositions = async () => {
       setLoadingPositions(true);
       setPositionsError(null);
 
       try {
-        // Initial fetch from REST API
-        const positions = await reyaApi.getWalletPositions(walletAddress);
-        
+        // Fetch initial positions from REST API
+        const initialPositions = await reyaApi.getWalletPositions(walletAddress);
+
         if (isMounted) {
-          setPositions(positions);
+          setPositions(initialPositions);
         }
 
-        // Connect to WebSocket and subscribe to position updates
+        // Connect to WebSocket
         await reyaWebSocket.connect();
 
         if (isMounted) {
-          unsubscribe = reyaWebSocket.subscribeToWalletPositions(walletAddress, (data) => {
+          // Subscribe to position updates (receives updates on trade executions)
+          unsubscribe = reyaWebSocket.subscribeToWalletPositions(normalizedAddress, (data) => {
             if (isMounted) {
-              // Use updatePositions to merge changes instead of replacing everything
-              const updatedPositions = Array.isArray(data) ? data : [data];
-              updatePositions(updatedPositions as Position[]);
+              const positions = Array.isArray(data) ? data : [data];
+              setPositions(positions as Position[]);
             }
           });
+
+          // Start polling for funding payment updates (every 30 seconds)
+          // Only poll when positions exist to minimize unnecessary API calls
+          pollInterval = setInterval(async () => {
+            if (!isMounted) return;
+
+            try {
+              const updatedPositions = await reyaApi.getWalletPositions(walletAddress);
+              if (isMounted) {
+                setPositions(updatedPositions);
+              }
+            } catch (error) {
+              console.error('[useWalletPositions] Polling failed:', error);
+            }
+          }, 30000); // 30 seconds - reasonable balance between freshness and API load
         }
       } catch (error) {
         if (isMounted) {
           const errorMessage = error instanceof Error ? error.message : 'Failed to initialize positions';
           setPositionsError(errorMessage);
-          console.error('Error initializing positions:', error);
+          console.error('[useWalletPositions] Error initializing positions:', error);
         }
       } finally {
         if (isMounted) {
@@ -67,31 +94,17 @@ export const useWalletPositions = () => {
       }
     };
 
-    /**
-     * Background refresh to ensure data integrity
-     */
-    const refreshData = async () => {
-      try {
-        const positions = await reyaApi.getWalletPositions(walletAddress);
-        if (isMounted) {
-          updatePositions(positions);
-        }
-      } catch (error) {
-        console.error('Background positions refresh failed:', error);
-      }
-    };
-
     initializePositions();
 
-    const interval = setInterval(refreshData, 10000);
-
-    // Cleanup: unsubscribe and mark as unmounted
+    // Cleanup: unsubscribe and clear polling
     return () => {
       isMounted = false;
-      clearInterval(interval);
       if (unsubscribe) {
         unsubscribe();
       }
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
     };
-  }, [walletAddress, setPositions, updatePositions, setLoadingPositions, setPositionsError]);
+  }, [walletAddress, setPositions, setLoadingPositions, setPositionsError]);
 }

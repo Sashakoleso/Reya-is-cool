@@ -22,3 +22,4 @@ export type Position = {
   avgEntryFundingValue: string;
   lastTradeSequenceNumber: number;
 };
+

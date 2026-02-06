@@ -19,6 +19,13 @@ export type WebSocketMessage = {
   id?: string;
 };
 
+export type SubscribedMessage = {
+  type: 'subscribed';
+  channel: string;
+  contents?: unknown;
+  data?: unknown;
+};
+
 export type SubscribeMessage = {
   type: 'subscribe'; channel: string; id?: string;
 };
