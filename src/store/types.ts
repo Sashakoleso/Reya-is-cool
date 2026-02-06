@@ -5,6 +5,8 @@ export type WalletState = {
   setWalletAddress: (address: string | null) => void;
   isWalletAddressValid: boolean;
   setIsWalletAddressValid: (isValid: boolean) => void;
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
 };
 
 export type MarketsState = {
@@ -15,6 +17,7 @@ export type MarketsState = {
 export type PositionsState = {
   positions: Position[];
   setPositions: (positions: Position[]) => void;
+  updatePositions: (positions: Position[]) => void;
   isLoadingPositions: boolean;
   setLoadingPositions: (loading: boolean) => void;
   positionsError: string | null;

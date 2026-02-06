@@ -12,15 +12,19 @@ const useWalletStoreBase = create<WalletState>()(
       walletAddress: null,
       /** Whether the current wallet address format is valid */
       isWalletAddressValid: true,
+      /** Current active tab in the sidebar */
+      activeTab: 'portfolio',
 
       /** Updates the current wallet address */
       setWalletAddress: (address) => set({walletAddress: address}),
       /** Updates the validity state of the wallet address */
       setIsWalletAddressValid: (isValid) => set({isWalletAddressValid: isValid}),
+      /** Updates the active tab */
+      setActiveTab: (tab) => set({activeTab: tab}),
     }),
     {
       name: 'wallet-storage',
-      partialize: (state) => ({ walletAddress: state.walletAddress }),
+      partialize: (state) => ({ walletAddress: state.walletAddress, activeTab: state.activeTab }),
     }
   )
 );
@@ -33,4 +37,6 @@ export const useWalletStore = Object.assign(useWalletStoreBase, {
   useIsWalletAddressValid: () => useWalletStoreBase((state) => state.isWalletAddressValid),
   useSetWalletAddress: () => useWalletStoreBase((state) => state.setWalletAddress),
   useSetIsWalletAddressValid: () => useWalletStoreBase((state) => state.setIsWalletAddressValid),
+  useActiveTab: () => useWalletStoreBase((state) => state.activeTab),
+  useSetActiveTab: () => useWalletStoreBase((state) => state.setActiveTab),
 });

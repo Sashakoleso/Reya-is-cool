@@ -13,6 +13,7 @@ import {Position} from '../services/api/types';
 export const useWalletPositions = () => {
   const walletAddress = useWalletStore.useWalletAddress();
   const setPositions = usePositionsStore.useSetPositions();
+  const updatePositions = usePositionsStore.useUpdatePositions();
   const setLoadingPositions = usePositionsStore.useSetLoadingPositions();
   const setPositionsError = usePositionsStore.useSetPositionsError();
 
@@ -47,9 +48,9 @@ export const useWalletPositions = () => {
         if (isMounted) {
           unsubscribe = reyaWebSocket.subscribeToWalletPositions(walletAddress, (data) => {
             if (isMounted) {
-              // Handle both array and single position updates from WebSocket
+              // Use updatePositions to merge changes instead of replacing everything
               const updatedPositions = Array.isArray(data) ? data : [data];
-              setPositions(updatedPositions as Position[]);
+              updatePositions(updatedPositions as Position[]);
             }
           });
         }
@@ -66,14 +67,31 @@ export const useWalletPositions = () => {
       }
     };
 
+    /**
+     * Background refresh to ensure data integrity
+     */
+    const refreshData = async () => {
+      try {
+        const positions = await reyaApi.getWalletPositions(walletAddress);
+        if (isMounted) {
+          updatePositions(positions);
+        }
+      } catch (error) {
+        console.error('Background positions refresh failed:', error);
+      }
+    };
+
     initializePositions();
+
+    const interval = setInterval(refreshData, 10000);
 
     // Cleanup: unsubscribe and mark as unmounted
     return () => {
       isMounted = false;
+      clearInterval(interval);
       if (unsubscribe) {
         unsubscribe();
       }
     };
-  }, [walletAddress, setPositions, setLoadingPositions, setPositionsError]);
+  }, [walletAddress, setPositions, updatePositions, setLoadingPositions, setPositionsError]);
 }
