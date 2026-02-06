@@ -26,15 +26,23 @@ export const navItem = style({
   border: `1px solid ${vars.colors.border}`,
 });
 export const navSubItem = style({
-  borderLeft: `1px solid white`,
+  borderLeft: `1px solid transparent`,
   display: 'flex',
   alignItems: 'center',
   marginLeft: vars.spacing.md,
   padding: `${vars.spacing.md} ${vars.spacing.lg}`,
-  color: vars.colors.text,
+  color: vars.colors.textSecondary,
   fontSize: vars.fontSize.md,
   fontWeight: vars.fontWeight.regular,
   cursor: 'pointer',
+  transition: 'all 0.15s ease',
+  ':hover': {
+    color: vars.colors.text,
+  }
+});
+export const navSubItemActive = style({
+  borderLeft: `1px solid white`,
+  color: vars.colors.text,
 });
 export const navItemActive = style({
   backgroundColor: vars.colors.backgroundSecondary,

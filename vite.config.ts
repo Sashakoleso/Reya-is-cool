@@ -4,11 +4,20 @@ import {vanillaExtractPlugin} from '@vanilla-extract/vite-plugin';
 import svgr from 'vite-plugin-svgr';
 
 export default defineConfig({
-  base: '/', plugins: [react(), svgr({
-    svgrOptions: {
-      exportType: 'default',
-    },
-  }), vanillaExtractPlugin(),], server: {
+  base: '/',
+  plugins: [
+    react(),
+    svgr({
+      svgrOptions: {
+        exportType: 'default',
+      },
+    }),
+    vanillaExtractPlugin(),
+  ],
+  optimizeDeps: {
+    include: ['recharts'],
+  },
+  server: {
     port: 3000,
   },
 });
