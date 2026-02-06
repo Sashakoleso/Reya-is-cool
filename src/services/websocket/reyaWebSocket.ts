@@ -118,8 +118,10 @@ const subscribe = (channel: string): void => {
 
   try {
     ws.send(JSON.stringify(message));
-    subscriptions.add(channel);
-    console.log('Subscribed to channel:', channel);
+    if (!subscriptions.has(channel)) {
+      subscriptions.add(channel);
+      console.log('Subscribed to channel:', channel);
+    }
   } catch (error) {
     console.error(`Failed to subscribe to channel ${channel}:`, error);
   }

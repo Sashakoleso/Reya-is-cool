@@ -10,5 +10,4 @@ export const page = style({
 export const content = style({
   display: 'flex',
   flexDirection: 'column',
-  borderBottom: `1px solid ${vars.colors.border}`,
 });

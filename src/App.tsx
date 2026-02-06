@@ -7,18 +7,17 @@ import * as styles from './App.css';
 import './styles/global.css';
 import {Footer} from "./components/Footer/Footer.tsx";
 import {MobileBlocking} from "./components/MobileBlocking/MobileBlocking";
+import {useWalletStore} from "./store/walletStore.ts";
 
 export const App = () => {
   const isMobile = useIsMobile();
 
-  if (isMobile) return <MobileBlocking />;
-
-  return (
-    <AppContent />
-  );
+  if (isMobile) return <MobileBlocking/>;
+  return <AppContent/>;
 };
 
 const AppContent = () => {
+  const isWalletAddressValid = useWalletStore.useIsWalletAddressValid()
   useMarkets();
 
   return (
@@ -26,9 +25,9 @@ const AppContent = () => {
       <Header/>
       <div className={styles.content}>
         <Sidebar/>
-        <div className={styles.main}>
+        {isWalletAddressValid && <div className={styles.main}>
           <PortfolioPage/>
-        </div>
+        </div>}
       </div>
       <Footer/>
     </div>
