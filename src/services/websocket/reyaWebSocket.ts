@@ -106,10 +106,7 @@ const disconnect = (): void => {
  * @param channel The channel name to subscribe to.
  */
 const subscribe = (channel: string): void => {
-  console.log('[WebSocket] subscribe() called for channel:', channel, 'WebSocket state:', ws?.readyState);
-
   if (!ws || ws.readyState !== WebSocket.OPEN) {
-    console.warn('[WebSocket] WebSocket not connected, queuing subscription:', channel);
     subscriptions.add(channel);
     return;
   }
@@ -169,14 +166,13 @@ const subscribeToPrices = (handler: (prices: Price | Price[]) => void): () => vo
 
 /**
  * Subscribes to position updates for a specific wallet address.
- * Note: This channel only sends data on subscription and trade events, not continuous updates.
+ * Note: This channel sends initial snapshot on subscription but does not send real-time updates.
  * @param address The wallet address.
  * @param handler Callback function to process position updates.
  * @returns A cleanup function to unsubscribe from the channel.
  */
 const subscribeToWalletPositions = (address: string, handler: (positions: Position[]) => void): () => void => {
   const channel = `/v2/wallet/${address}/positions`;
-  console.log('[WebSocket] subscribeToWalletPositions() called for correct wallet address');
   messageHandlers.set(channel, handler as MessageHandler<string>);
   subscribe(channel);
   return () => {

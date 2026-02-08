@@ -4,8 +4,9 @@ A real-world portfolio management interface for Reya DEX, built with React, Type
 
 ## 🚀 Features
 
-- **Real-time Position Tracking**: View all wallet positions across different accounts.
-- **Live Price Updates**: WebSocket integration for fetching up-to-date mark prices.
+- **Real-time Position Tracking**: View all wallet positions across different accounts with automatic updates.
+- **Live Price Updates**: WebSocket integration for real-time mark prices (updated instantly).
+- **Hybrid Data Fetching**: WebSocket for initial snapshot + polling for position updates (every 10 seconds).
 - **Position Aggregation**: Automatic grouping of positions by market symbol.
 - **Optimized Rendering**: Smart filtering of price updates to prevent excessive re-renders.
 - **Sorting**: Ability to sort positions by market, size, value, and price.
@@ -58,7 +59,7 @@ src/
 │   ├── Footer/          # Footer component
 │   ├── Header/          # Header component
     ├── SideBar/         # Sidebar component
-│   ├── Portfolio/       # Portfolio-specific components (Table, Row, Input)
+│   ├── Portfolio/       # Portfolio-specific components (Table, Row, Input, Positions Pie chart)
 ├── hooks/               # Custom React hooks (logic separation)
 ├── services/            # API and WebSocket services
 │   ├── api/             # REST API client
@@ -85,10 +86,20 @@ To avoid UI flickering and excessive CPU load, price updates in the store (`pric
 ### Position Aggregation
 Since a single wallet can have multiple positions on the same market across different accounts, the system automatically aggregates them into a single table row, calculating the Net Exposure.
 
-## 🔌 Integration
+## 🔌 Data Integration
 
-- **REST API**: Used for initial loading of positions (`/v2/wallet/{address}/positions`) and market definitions.
-- **WebSocket**: Used for the `/v2/prices` channel, ensuring prices are kept up to date without page refreshes.
+### WebSocket Channels
+- **`/v2/prices`**: Real-time price updates (Mark Price) - receives `channel_data` updates continuously
+- **`/v2/wallet/{address}/positions`**: Initial position snapshot on subscription
+
+### REST API
+- **`/v2/wallet/{address}/positions`**: Polling every 30 seconds for position updates (Market and Size values)
+- **`/marketDefinitions`**: Market metadata (loaded once on startup)
+
+### Why Hybrid Approach?
+The WebSocket positions channel only sends an initial snapshot on subscription but does not send real-time `channel_data` updates. Therefore, we use:
+1. **WebSocket** - Fast initial loading
+2. **Polling** - Regular updates for changing position sizes
 
 ## 🎨 Technology Stack
 

@@ -1,8 +1,8 @@
 import {useEffect} from 'react';
 import {useWalletStore} from '../store/walletStore';
 import {usePositionsStore} from '../store/positionsStore';
-import {reyaApi} from '../services/api/reyaApi';
 import {reyaWebSocket} from '../services/websocket/reyaWebSocket';
+import {reyaApi} from '../services/api/reyaApi';
 import {Position} from '../services/api/types';
 
 /**
@@ -11,10 +11,10 @@ import {Position} from '../services/api/types';
  * Data Sources:
  * - WebSocket channel: /v2/wallet/{address}/positions
  *   - Provides initial snapshot on subscription
- *   - Sends updates only on trade executions (NOT on funding payments)
- * - REST API polling (every 30 seconds when positions exist):
- *   - Updates position sizes affected by funding payments
- *   - Ensures data stays fresh even without trades
+ *   - NOTE: Does NOT send real-time updates via channel_data
+ * - REST API polling (every 10 seconds):
+ *   - Updates position sizes (Market and Size values change over time)
+ *   - Ensures data stays fresh
  *
  * Implements protection against race conditions using isMounted flag.
  */
@@ -40,25 +40,18 @@ export const useWalletPositions = () => {
 
     /**
      * Initializes WebSocket connection and subscribes to position updates.
-     * Also sets up polling for funding payment updates.
+     * Also sets up polling for continuous updates.
      */
     const initializePositions = async () => {
       setLoadingPositions(true);
       setPositionsError(null);
 
       try {
-        // Fetch initial positions from REST API
-        const initialPositions = await reyaApi.getWalletPositions(walletAddress);
-
-        if (isMounted) {
-          setPositions(initialPositions);
-        }
-
         // Connect to WebSocket
         await reyaWebSocket.connect();
 
         if (isMounted) {
-          // Subscribe to position updates (receives updates on trade executions)
+          // Subscribe to position updates (receives initial snapshot only)
           unsubscribe = reyaWebSocket.subscribeToWalletPositions(normalizedAddress, (data) => {
             if (isMounted) {
               const positions = Array.isArray(data) ? data : [data];
@@ -66,8 +59,8 @@ export const useWalletPositions = () => {
             }
           });
 
-          // Start polling for funding payment updates (every 30 seconds)
-          // Only poll when positions exist to minimize unnecessary API calls
+          // Start polling for position updates (every 10 seconds)
+          // WebSocket does NOT send channel_data updates for positions
           pollInterval = setInterval(async () => {
             if (!isMounted) return;
 
