@@ -2,6 +2,8 @@
 
 A real-world portfolio management interface for Reya DEX, built with React, TypeScript, and Vanilla Extract with real-time update support.
 
+*Another resource with real-time data usage with TradingView charts: https://trading-view-example-test.vercel.app/
+
 ## 🚀 Features
 
 - **Real-time Position Tracking**: View all wallet positions across different accounts with automatic updates.
