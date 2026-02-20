@@ -4,6 +4,7 @@ export type AggregatedPosition = {
   side: 'B' | 'S';
   positionValue: string;
   markPrice: string;
+  maxLeverage?: string;
 };
 
 export type SortField = 'symbol' | 'size' | 'value' | 'price';
