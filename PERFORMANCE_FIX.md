@@ -1,7 +1,7 @@
 # Performance Issue Summary
 
 ## Problem
-All `PositionRow` components were re-rendering constantly on every prop change, even when their specific data (`markPrice` and `size`) remained unchanged. Additionally, the entire `tbody` (PositionsTableContent) was flickering on every update.
+All `PositionRow` components were re-rendering constantly on every prop change, even when their specific data (`markPrice` and `size`) remained unchanged.
 
 ## Root Causes
 1. **No custom comparison in `memo`** - The default shallow comparison was checking the entire `position` object reference, which changed on every render even with identical data.
@@ -33,6 +33,5 @@ All `PositionRow` components were re-rendering constantly on every prop change, 
 
 ## Result
 ✅ Individual `PositionRow` components now only re-render when their specific `markPrice` or `size` values change significantly
-✅ `PositionsTableContent` (tbody) only re-renders when sort parameters change or positions are added/removed/reordered
 ✅ Dramatically reduced unnecessary renders and improved overall performance
 ✅ React Profiler now shows minimal flickering only for components with actual data changes
